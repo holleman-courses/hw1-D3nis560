@@ -20,14 +20,14 @@ print(f"Keras Version: {keras.__version__}")
 
 def build_model1():
   model = Sequential([
-    layers.Flatten(input_shape=(32, 32, 3)),
-    layers.Dense(128),
-    layers.LeakyReLU(),
-    layers.Dense(128),
-    layers.LeakyReLU(),
-    layers.Dense(128),
-    layers.LeakyReLU(),
-    layers.Dense(10)  # logits
+    layers.Flatten(name="flatten", input_shape=(32, 32, 3)),
+    layers.Dense(128, name="dense1"),
+    layers.LeakyReLU(name="leaky_relu1"),
+    layers.Dense(128, name="dense2"),
+    layers.LeakyReLU(name="leaky_relu2"),
+    layers.Dense(128, name="dense3"),
+    layers.LeakyReLU(name="leaky_relu3"),
+    layers.Dense(10, name="dense_out")  # logits
   ])
 
   model.compile(
@@ -40,64 +40,78 @@ def build_model1():
 
 def build_model2():
   model = Sequential([
-    layers.Conv2D(32, 3, strides=2, padding='same', activation='relu',
-                  input_shape=(32, 32, 3)),
-    layers.BatchNormalization(),
+    layers.Conv2D(32, 3, strides=2, padding='same', activation='relu', name="conv2d_1", input_shape=(32, 32, 3)),
+    layers.BatchNormalization(name="bn_1"),
 
-    layers.Conv2D(64, 3, strides=2, padding='same', activation='relu'),
-    layers.BatchNormalization(),
+    layers.Conv2D(64, 3, strides=2, padding='same', activation='relu', name="conv2d_2"),
+    layers.BatchNormalization(name="bn_2"),
   ])
 
-  for _ in range(4):
-    model.add(layers.Conv2D(64, 3, padding='same', activation='relu'))
-    model.add(layers.BatchNormalization())
+  for i in range(3, 7):
+    model.add(layers.Conv2D(64, 3, padding='same', activation='relu', name=f"conv2d_{i}"))
+    model.add(layers.BatchNormalization(name=f"bn_{i}"))
 
-  model.add(layers.Conv2D(128, 3, padding='same', activation='relu'))
-  model.add(layers.BatchNormalization())
+  model.add(layers.Conv2D(128, 3, padding='same', activation='relu', name="conv2d_7"))
+  model.add(layers.BatchNormalization(name="bn_7"))
 
-  model.add(layers.Flatten())
-  model.add(layers.Dense(10))
+  model.add(layers.Flatten(name="flatten"))
+  model.add(layers.Dense(10, name="dense_out"))
 
   model.compile(
     optimizer='adam',
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
     metrics=['accuracy']
   )
-
-
   return model
 
 def build_model3():
-  inputs = Input(shape=(32, 32, 3))
+  inputs = Input(shape=(32, 32, 3), name="input")
 
-  x = layers.Conv2D(32, 3, strides=2, padding='same', activation='relu')(inputs)
-  x = layers.BatchNormalization()(x)
+  x = layers.Conv2D(32, 3, strides=2, padding='same', activation='relu', name="conv2d_1")(inputs)
+  x = layers.BatchNormalization(name="bn_1")(x)
 
-  x = layers.SeparableConv2D(64, 3, strides=2, padding='same', activation='relu')(x)
-  x = layers.BatchNormalization()(x)
+  x = layers.SeparableConv2D(64, 3, strides=2, padding='same', activation='relu', name="sep_conv2d_2")(x)
+  x = layers.BatchNormalization(name="bn_2")(x)
 
-  for _ in range(4):
-    x = layers.SeparableConv2D(64, 3, padding='same', activation='relu')(x)
-    x = layers.BatchNormalization()(x)
+  for i in range(3, 7):
+    x = layers.SeparableConv2D(64, 3, padding='same', activation='relu', name=f"sep_conv2d_{i}")(x)
+    x = layers.BatchNormalization(name=f"bn_{i}")(x)
 
-  x = layers.SeparableConv2D(128, 3, padding='same', activation='relu')(x)
-  x = layers.BatchNormalization()(x)
+  x = layers.SeparableConv2D(128, 3, padding='same', activation='relu', name="sep_conv2d_7")(x)
+  x = layers.BatchNormalization(name="bn_7")(x)
 
-  x = layers.Flatten()(x)
-  outputs = layers.Dense(10)(x)
+  x = layers.Flatten(name="flatten")(x)
+  outputs = layers.Dense(10, name="dense_out")(x)
 
   model = tf.keras.Model(inputs, outputs)
-
   model.compile(
     optimizer='adam',
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
     metrics=['accuracy']
   )
-
   return model
 
 def build_model50k():
-  model = None # Add code to define model 1.
+  inputs = Input(shape=(32, 32, 3), name="input")
+
+  x = layers.SeparableConv2D(32, 3, strides=2, padding='same', activation='relu', name="sep_conv2d_1")(inputs)
+  x = layers.BatchNormalization(name="bn_1")(x)
+
+  x = layers.SeparableConv2D(64, 3, strides=2, padding='same', activation='relu', name="sep_conv2d_2")(x)
+  x = layers.BatchNormalization(name="bn_2")(x)
+
+  x = layers.SeparableConv2D(64, 3, padding='same', activation='relu', name="sep_conv2d_3")(x)
+  x = layers.BatchNormalization(name="bn_3")(x)
+
+  x = layers.GlobalAveragePooling2D(name="gap")(x)
+  outputs = layers.Dense(10, name="dense_out")(x)
+
+  model = tf.keras.Model(inputs, outputs)
+  model.compile(
+    optimizer='adam',
+    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    metrics=['accuracy']
+  )
   return model
 
 # no training or dataset construction should happen above this line
