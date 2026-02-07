@@ -123,7 +123,6 @@ if __name__ == '__main__':
   ########################################
   ## Build and train model 1
   model1 = build_model1()
-  model1.summary()
 
   history1 = model1.fit(
     train_images, train_labels,
@@ -137,7 +136,6 @@ if __name__ == '__main__':
 
   ## Build, compile, and train model 2 (DS Convolutions)
   model2 = build_model2()
-  model2.summary()
 
   history2 = model2.fit(
     train_images, train_labels,
